@@ -1,6 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-// import 'player_screen.dart';
 
 void main() {
   runApp(const MyApp());
