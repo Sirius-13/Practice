@@ -1,6 +1,6 @@
 # music_player
 
-Music player for assignment
+Music player made with Flutter Dart for self-practice
 
 ## Getting Started
 
