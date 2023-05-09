@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Music Player 1'),
+      home: const MyHomePage(title: 'Music Player'),
     );
   }
 }
