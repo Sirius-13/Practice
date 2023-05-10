@@ -40,6 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
     {"songName": "A New Start", "artistName": "Nanashi Mumei"},
     {"songName": "Stellar Stellar", "artistName": "Hoshimachi Suisei"},
     {"songName": "Yume Hanabi", "artistName": "Nakiri Ayame"},
+    {"songName": "Kaijyu no Hanauta", "artistName": "Vaundy"},
   ];
 
   @override
@@ -70,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
               subtitle: Text("${playList[index]['artistName']}",
                   style: TextStyle(color: Colors.white)),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerScreenPage(songName: playList[index])));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerScreenPage(selectedSong: playList[index])));
                 // print(playList[index]);
                 },
             );
@@ -97,9 +98,9 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class PlayerScreenPage extends StatefulWidget {
-  const PlayerScreenPage({super.key, required this.songName});
+  const PlayerScreenPage({super.key, required this.selectedSong});
 
-  final Map<String, String> songName;
+  final Map<String, String> selectedSong;
 
   @override
   State<PlayerScreenPage> createState() => _PlayerScreenState();
@@ -110,6 +111,14 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
   //MediaQuery
   double screenHeight = 0;
   double screenWidth = 0;
+
+  //PlayList
+  var playList = [
+    {"songName": "A New Start", "artistName": "Nanashi Mumei"},
+    {"songName": "Stellar Stellar", "artistName": "Hoshimachi Suisei"},
+    {"songName": "Yume Hanabi", "artistName": "Nakiri Ayame"},
+    {"songName": "Kaijyu no Hanauta", "artistName": "Vaundy"},
+  ];
 
   //AudioPlayer
   final player = AudioPlayer();
@@ -123,13 +132,18 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
 
   //Cover Image Link
   String coverImgLink = '';
-
   //Song Link
   String songPath = '';
 
   //Time and Duration
-  Duration? duration = Duration(seconds: 0);
+  Duration? position = new Duration();
+  Duration? duration = new Duration();
+
+  //Slider value
   double value = 0;
+
+  //Index of Selected Song from PlayList
+  int currentIndex = 0;
 
   @override
   void initState() {
@@ -137,29 +151,68 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
     initPlayer();
   }
 
+  void autoPlay() {
+    setState(() {
+      isPlaying = true;
+      setState(() {
+        if (isPlaying) {
+          player.play(AssetSource(songPath));
+          player.onPositionChanged.listen((_position) {
+            setState(() {
+              value = _position.inSeconds.toDouble();
+              position = _position;
+              // print(position);
+            });
+          });
+        } else {
+          player.pause();
+        }
+      });
+    });
+  }
+
   void initPlayer() async {
+    for (int i = 0; i < playList.length; i++) {
+      if (widget.selectedSong['songName'] == playList[i]['songName']) {
+        currentIndex = i;
+      }
+    }
     if (isPlaying == false) {
-      if (widget.songName['songName'] == 'A New Start') {
+      if (widget.selectedSong['songName'] == 'A New Start') {
         coverImgLink =
         "https://hololive.hololivepro.com/wp-content/uploads/2022/01/Nanashi-Mumei_ANewStart_Jk-1536x1536.png";
         songPath = 'A_New_Start.mp3';
         await player.setSource(AssetSource(songPath));
         await player.onDurationChanged.first;
-        // duration = await player.getDuration();
-      } else if (widget.songName['songName'] == 'Stellar Stellar') {
+        duration = await player.getDuration();
+        autoPlay();
+      }
+      if (widget.selectedSong['songName'] == 'Stellar Stellar') {
         coverImgLink =
         "https://cdn.shopify.com/s/files/1/0529/2641/5045/products/1220__1st_StillStillStellar_fa5fe8e6-a2f8-483a-a4f7-464fc9f8efdd.png?v=1639564807";
         songPath = 'Stellar_Stellar.mp3';
         await player.setSource(AssetSource(songPath));
         await player.onDurationChanged.first;
         duration = await player.getDuration();
-      } else if (widget.songName['songName'] == 'Yume Hanabi') {
+        autoPlay();
+      }
+      if (widget.selectedSong['songName'] == 'Yume Hanabi') {
         coverImgLink =
         "https://hololive.hololivepro.com/wp-content/uploads/2022/12/%E7%99%BE%E9%AC%BC%E3%81%82%E3%82%84%E3%82%81_%E5%A4%A2%E8%8A%B1%E7%81%AB_jk.png";
         songPath = 'Yume_Hanabi.mp3';
         await player.setSource(AssetSource(songPath));
         await player.onDurationChanged.first;
         duration = await player.getDuration();
+        autoPlay();
+      }
+      if (widget.selectedSong['songName'] == 'Kaijyu no Hanauta') {
+        coverImgLink =
+        "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcSZ6AYUQciI9nHNWbwIBdQxMmYzKa01gctB0tO9Y6Kkra7nL-jm";
+        songPath = 'Kaijyu_no_Hanauta.mp3';
+        await player.setSource(AssetSource(songPath));
+        await player.onDurationChanged.first;
+        duration = await player.getDuration();
+        autoPlay();
       }
     }
   }
@@ -173,6 +226,57 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
     void playPause() {
       setState(() {
         isPlaying = !isPlaying;
+        setState(() {
+          if (isPlaying) {
+            player.play(AssetSource(songPath));
+            player.onPositionChanged.listen((_position) {
+              setState(() {
+                value = _position.inSeconds.toDouble();
+                position = _position;
+                // print(position);
+              });
+            });
+          } else {
+            player.pause();
+          }
+        });
+      });
+    }
+
+    //Play Next Song
+    void playNext() async {
+      currentIndex++;
+      if (currentIndex >= playList.length) {
+        currentIndex = 0; // Wrap around to the beginning of the playlist
+      }
+      // Load and play the new song
+      setState(() {
+        isPlaying = false; // Pause the current song
+        position = Duration.zero;
+        value = 0;
+        widget.selectedSong['songName'] = playList[currentIndex]['songName']!;
+        widget.selectedSong['artistName'] = playList[currentIndex]['artistName']!;
+        initPlayer();
+      });
+    }
+
+    //Play Previous Song
+    void playPrevious() async {
+      currentIndex--;
+      //To Get Last Index of PlayList
+      for (int i = 0; i < playList.length; i++) {
+        if (currentIndex < 0 && i == playList.length - 1) {
+          currentIndex = i;
+        }
+      }
+      // Load and play the new song
+      setState(() {
+        isPlaying = false; // Pause the current song
+        position = Duration.zero;
+        value = 0;
+        widget.selectedSong['songName'] = playList[currentIndex]['songName']!;
+        widget.selectedSong['artistName'] = playList[currentIndex]['artistName']!;
+        initPlayer();
       });
     }
 
@@ -198,6 +302,7 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
                 coverImgLink,
                 width: 300,
                 height: 300,
+                scale: 0.5,
               ),
             ),
             //Song Name
@@ -206,7 +311,7 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
               children: [
                 Padding(
                     padding: EdgeInsets.only(top: 10.0),
-                    child: Text(widget.songName['songName']!,
+                    child: Text(widget.selectedSong['songName']!,
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 30,
@@ -219,7 +324,7 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
               children: [
                 Padding(
                     padding: EdgeInsets.fromLTRB(0, 10.0, 0, 30.0),
-                    child: Text(widget.songName['artistName']!,
+                    child: Text(widget.selectedSong['artistName']!,
                         style: TextStyle(color: Colors.white, fontSize: 15))),
               ],
             ),
@@ -233,7 +338,6 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
                     onChangeEnd: (new_value) async {
                       setState(() {
                         value = new_value;
-                        // print(new_value);
                       });
                       await player.seek(Duration(seconds: new_value.toInt()));
                     },
@@ -251,10 +355,10 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('${(value / 60).floor()} : ${(value.floor() % 60).floor()}',
+                Text('${position.toString().split(".")[0].split(":")[1]} : ${position.toString().split(".")[0].split(":")[2]}' ,
                     style: TextStyle(color: Colors.grey)),
-                SizedBox(width: 200),
-                Text('${duration!.inMinutes} : ${duration!.inSeconds % 60}',
+                SizedBox(width: 180),
+                Text('${duration.toString().split(".")[0].split(":")[1]} : ${duration.toString().split(".")[0].split(":")[2]}',
                     style: TextStyle(color: Colors.grey)),
               ],
             ),
@@ -284,7 +388,9 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
                 //Previous Button
                 IconButton(
                   icon: Icon(Icons.skip_previous_rounded),
-                  onPressed: () {},
+                  onPressed: () {
+                    playPrevious();
+                  },
                   iconSize: 50,
                   color: Colors.white,
                   splashColor: Colors.transparent,
@@ -297,18 +403,6 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
                       : Icon(Icons.play_circle_rounded),
                   onPressed: () {
                     playPause();
-                    setState(() {
-                      if (isPlaying) {
-                        player.play(AssetSource(songPath));
-                        player.onPositionChanged.listen((position) {
-                          setState(() {
-                            value = position.inSeconds.toDouble();
-                          });
-                        });
-                      } else {
-                        player.pause();
-                      }
-                    });
                   },
                   iconSize: 50,
                   color: Colors.white,
@@ -318,7 +412,9 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
                 //Next Button
                 IconButton(
                   icon: Icon(Icons.skip_next_rounded),
-                  onPressed: () {},
+                  onPressed: () {
+                    playNext();
+                  },
                   iconSize: 50,
                   color: Colors.white,
                   splashColor: Colors.transparent,
