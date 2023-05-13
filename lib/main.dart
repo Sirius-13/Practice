@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,10 +38,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //PlayList
   var playList = [
-    {"songName": "A New Start", "artistName": "Nanashi Mumei"},
-    {"songName": "Stellar Stellar", "artistName": "Hoshimachi Suisei"},
-    {"songName": "Yume Hanabi", "artistName": "Nakiri Ayame"},
-    {"songName": "Kaijyu no Hanauta", "artistName": "Vaundy"},
+    {
+      "songName": "A New Start",
+      "artistName": "七詩ムメイ",
+      "songPath": "A_New_Start.mp3",
+      "coverImgLink": "https://hololive.hololivepro.com/wp-content/uploads/2022/01/Nanashi-Mumei_ANewStart_Jk-1536x1536.png"
+    },
+    {
+      "songName": "Stellar Stellar",
+      "artistName": "星街すいせい",
+      "songPath": "Stellar_Stellar.mp3",
+      "coverImgLink": "https://cdn.shopify.com/s/files/1/0529/2641/5045/products/1220__1st_StillStillStellar_fa5fe8e6-a2f8-483a-a4f7-464fc9f8efdd.png?v=1639564807"
+    },
+    {
+      "songName": "夢花火",
+      "artistName": "百鬼あやめ",
+      "songPath": "Yume_Hanabi.mp3",
+      "coverImgLink": "https://hololive.hololivepro.com/wp-content/uploads/2022/12/%E7%99%BE%E9%AC%BC%E3%81%82%E3%82%84%E3%82%81_%E5%A4%A2%E8%8A%B1%E7%81%AB_jk.png"},
+    {
+      "songName": "怪獣の花唄",
+      "artistName": "Vaundy",
+      "songPath": "Kaijyu_no_Hanauta.mp3",
+      "coverImgLink": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcSZ6AYUQciI9nHNWbwIBdQxMmYzKa01gctB0tO9Y6Kkra7nL-jm"
+    },
   ];
 
   @override
@@ -61,11 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
           itemBuilder: (BuildContext context, int index) {
             return ListTile(
-              // leading: const Icon(Icons.list),
-              // trailing: const Text(
-              //   "GFG",
-              //   style: TextStyle(color: Colors.green, fontSize: 15),
-              // ),
               title: Text("${playList[index]['songName']}",
                   style: TextStyle(color: Colors.white)),
               subtitle: Text("${playList[index]['artistName']}",
@@ -114,10 +129,29 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
 
   //PlayList
   var playList = [
-    {"songName": "A New Start", "artistName": "Nanashi Mumei"},
-    {"songName": "Stellar Stellar", "artistName": "Hoshimachi Suisei"},
-    {"songName": "Yume Hanabi", "artistName": "Nakiri Ayame"},
-    {"songName": "Kaijyu no Hanauta", "artistName": "Vaundy"},
+    {
+      "songName": "A New Start",
+      "artistName": "七詩ムメイ",
+      "songPath": "A_New_Start.mp3",
+      "coverImgLink": "https://hololive.hololivepro.com/wp-content/uploads/2022/01/Nanashi-Mumei_ANewStart_Jk-1536x1536.png"
+    },
+    {
+      "songName": "Stellar Stellar",
+      "artistName": "星街すいせい",
+      "songPath": "Stellar_Stellar.mp3",
+      "coverImgLink": "https://cdn.shopify.com/s/files/1/0529/2641/5045/products/1220__1st_StillStillStellar_fa5fe8e6-a2f8-483a-a4f7-464fc9f8efdd.png?v=1639564807"
+    },
+    {
+      "songName": "夢花火",
+      "artistName": "百鬼あやめ",
+      "songPath": "Yume_Hanabi.mp3",
+      "coverImgLink": "https://hololive.hololivepro.com/wp-content/uploads/2022/12/%E7%99%BE%E9%AC%BC%E3%81%82%E3%82%84%E3%82%81_%E5%A4%A2%E8%8A%B1%E7%81%AB_jk.png"},
+    {
+      "songName": "怪獣の花唄",
+      "artistName": "Vaundy",
+      "songPath": "Kaijyu_no_Hanauta.mp3",
+      "coverImgLink": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcSZ6AYUQciI9nHNWbwIBdQxMmYzKa01gctB0tO9Y6Kkra7nL-jm"
+    },
   ];
 
   //AudioPlayer
@@ -132,7 +166,7 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
 
   //Cover Image Link
   String coverImgLink = '';
-  //Song Link
+  //Song Path
   String songPath = '';
 
   //Time and Duration
@@ -151,64 +185,38 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
     initPlayer();
   }
 
+  //Auto play a song when clicked on it
   void autoPlay() {
-    setState(() {
-      isPlaying = true;
+    if (isPlaying == false) {
       setState(() {
-        if (isPlaying) {
-          player.play(AssetSource(songPath));
-          player.onPositionChanged.listen((_position) {
-            setState(() {
-              value = _position.inSeconds.toDouble();
-              position = _position;
-              // print(position);
+        isPlaying = true;
+        setState(() {
+          if (isPlaying) {
+            player.play(AssetSource(songPath));
+            player.onPositionChanged.listen((_position) {
+              setState(() {
+                value = _position.inSeconds.toDouble();
+                position = _position;
+                // print(position);
+                // print(duration);
+              });
             });
-          });
-        } else {
-          player.pause();
-        }
+          } else {
+            player.pause();
+          }
+        });
       });
-    });
+    } else {
+      initPlayer();
+    }
   }
 
   void initPlayer() async {
     for (int i = 0; i < playList.length; i++) {
       if (widget.selectedSong['songName'] == playList[i]['songName']) {
         currentIndex = i;
-      }
-    }
-    if (isPlaying == false) {
-      if (widget.selectedSong['songName'] == 'A New Start') {
-        coverImgLink =
-        "https://hololive.hololivepro.com/wp-content/uploads/2022/01/Nanashi-Mumei_ANewStart_Jk-1536x1536.png";
-        songPath = 'A_New_Start.mp3';
-        await player.setSource(AssetSource(songPath));
-        await player.onDurationChanged.first;
-        duration = await player.getDuration();
-        autoPlay();
-      }
-      if (widget.selectedSong['songName'] == 'Stellar Stellar') {
-        coverImgLink =
-        "https://cdn.shopify.com/s/files/1/0529/2641/5045/products/1220__1st_StillStillStellar_fa5fe8e6-a2f8-483a-a4f7-464fc9f8efdd.png?v=1639564807";
-        songPath = 'Stellar_Stellar.mp3';
-        await player.setSource(AssetSource(songPath));
-        await player.onDurationChanged.first;
-        duration = await player.getDuration();
-        autoPlay();
-      }
-      if (widget.selectedSong['songName'] == 'Yume Hanabi') {
-        coverImgLink =
-        "https://hololive.hololivepro.com/wp-content/uploads/2022/12/%E7%99%BE%E9%AC%BC%E3%81%82%E3%82%84%E3%82%81_%E5%A4%A2%E8%8A%B1%E7%81%AB_jk.png";
-        songPath = 'Yume_Hanabi.mp3';
-        await player.setSource(AssetSource(songPath));
-        await player.onDurationChanged.first;
-        duration = await player.getDuration();
-        autoPlay();
-      }
-      if (widget.selectedSong['songName'] == 'Kaijyu no Hanauta') {
-        coverImgLink =
-        "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcSZ6AYUQciI9nHNWbwIBdQxMmYzKa01gctB0tO9Y6Kkra7nL-jm";
-        songPath = 'Kaijyu_no_Hanauta.mp3';
+        coverImgLink = playList[i]['coverImgLink'] ?? "Unknown";
+        songPath = playList[i]['songPath']!;
         await player.setSource(AssetSource(songPath));
         await player.onDurationChanged.first;
         duration = await player.getDuration();
@@ -244,10 +252,11 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
     }
 
     //Play Next Song
-    void playNext() async {
+    void playNext() {
       currentIndex++;
       if (currentIndex >= playList.length) {
-        currentIndex = 0; // Wrap around to the beginning of the playlist
+        // Wrap around to the beginning of the playlist
+        currentIndex = 0;
       }
       // Load and play the new song
       setState(() {
@@ -261,7 +270,7 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
     }
 
     //Play Previous Song
-    void playPrevious() async {
+    void playPrevious() {
       currentIndex--;
       //To Get Last Index of PlayList
       for (int i = 0; i < playList.length; i++) {
@@ -278,6 +287,16 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
         widget.selectedSong['artistName'] = playList[currentIndex]['artistName']!;
         initPlayer();
       });
+    }
+
+    //Loop Current Song
+    void loopSong() {
+      setState(() {
+        isLooping = !isLooping;
+      });
+      if (isLooping) {
+        player.setReleaseMode(ReleaseMode.loop);
+      }
     }
 
     return Scaffold(
@@ -298,11 +317,11 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
             //Cover Image
             ClipRRect(
               borderRadius: BorderRadius.circular(30.0),
-              child: Image.network(
-                coverImgLink,
+              child: CachedNetworkImage(
+                imageUrl: coverImgLink,
                 width: 300,
                 height: 300,
-                scale: 0.5,
+                // scale: 0.5,
               ),
             ),
             //Song Name
@@ -351,7 +370,7 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
                 ),
               ],
             ),
-            //Time Duration
+            //Audio Time Duration
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -373,12 +392,7 @@ class _PlayerScreenState extends State<PlayerScreenPage> {
                 IconButton(
                   icon: isLooping? Icon(Icons.loop) : Icon(Icons.shuffle),
                   onPressed: () {
-                    setState(() {
-                      isLooping = !isLooping;
-                    });
-                    if (isLooping) {
-                      player.setReleaseMode(ReleaseMode.loop);
-                    }
+                    loopSong();
                   },
                   iconSize: 30,
                   color: Colors.white,
