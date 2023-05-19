@@ -1,6 +1,6 @@
-# music_player
+# audio_player
 
-Music player made with Flutter Dart for self-practice
+Audio player made with Flutter Dart for self-practice
 
 ## Getting Started
 
